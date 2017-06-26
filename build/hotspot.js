@@ -52,5 +52,12 @@ module.exports = {
         if (typeof Hotspot !== 'string') return Hotspot.getStatus();else return new _bluebird2.default(function (reject) {
             return reject.bind(_this3, Hotspot);
         });
+    },
+    getClients: function getClients() {
+        var _this3 = this;
+
+        if (typeof Hotspot !== 'string') return Hotspot.getClients();else return new _bluebird2.default(function (reject) {
+            return reject.bind(_this3, Hotspot);
+        });
     }
 };

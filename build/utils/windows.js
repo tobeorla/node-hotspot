@@ -20,6 +20,30 @@ var _child_process = require('child_process');
 
 var _child_process2 = _interopRequireDefault(_child_process);
 
+var locales = {
+    'es' : {
+        'Hosted network supported' : 'Red hospedada admitida',
+        'Hosted network status' : 'Estado de la red hospedada',
+        'Hosted network settings' : 'Configuraci�n de red hospedada',
+        'Number of clients' : 'N�mero de clientes',
+        'Max number of clients' : 'N� m�ximo de clientes',
+        'SSID name' : 'BSSID',
+        'Started' : 'Iniciado',
+        'Status' : 'Estado',
+        'yes' : 's�',
+    }
+}, currentLocale = 'es';
+
+function getPhrase (phrase) {
+    if (currentLocale == 'en_US') {
+        return phrase;
+    }
+    if (typeof locales[currentLocale][phrase] === undefined) {
+        throw "Missing phrase";
+    }
+    return locales[currentLocale][phrase];
+}
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var arch = false;
@@ -61,7 +85,7 @@ module.exports = {
             }).then(function (hostedNetwork) {
                 return new _bluebird2.default(function (resolve, reject) {
                     if (_this.ConnectedAdaptor) _lodash2.default.delay(function () {
-                        _this.exec(_util2.default.format('"%s" enable "%s" "%s" true', _path2.default.join(__dirname, '../../', 'bin/win32/IcsManager.exe'), _this.ConnectedAdaptor, hostedNetwork)).then(resolve).catch(reject);
+                        _this.exec(_util2.default.format('"%s" enable "%s" "%s" true', _path2.default.join(__dirname, '../../../../../../../', 'bin/win32/IcsManager.exe'), _this.ConnectedAdaptor, hostedNetwork)).then(resolve).catch(reject);
                     }, 500);else resolve();
                 });
             }).then(function () {
@@ -85,11 +109,14 @@ module.exports = {
             _this3.getArch().then(function () {
                 return _bluebird2.default.all([_this3.exec('netsh wlan show hostednetwork'), _this3.getNetworkAdaptors(), _this3.getInternetConnectedAdaptor(), _this3.getCompatible()]);
             }).spread(function (status, NetworkAdaptors, ConnectedAdaptor, Compatible) {
-                var output = status.split('Hosted network settings')[1].replace('-----------------------', '').split('Hosted network status')[0].split('\n').map(Function.prototype.call, String.prototype.trim).filter(Boolean).concat(status.split('Hosted network status')[1].replace('---------------------', '').split('\n').map(Function.prototype.call, String.prototype.trim).filter(Boolean));
+                var output = status.split(getPhrase('Hosted network settings'))[1].replace('-----------------------', '').split(getPhrase('Hosted network status'))[0].split('\n').map(Function.prototype.call, String.prototype.trim).filter(Boolean).concat(status.split(getPhrase('Hosted network status'))[1].replace('---------------------', '').split('\n').map(Function.prototype.call, String.prototype.trim).filter(Boolean));
 
                 var statusObject = {};
                 output.forEach(function (statusItem) {
-                    if (statusItem.split(':')[0].trim() === 'SSID name') var parm = statusItem.split(':')[1].trim().substring(1, statusItem.split(':')[1].trim().length - 1);else var parm = statusItem.split(':').length > 2 ? statusItem.split(':').splice(0, 1).join(':').trim() : statusItem.split(':')[1].trim();
+                    if (statusItem.indexOf(":") === -1) {
+                        return;
+                    }
+                    if (statusItem.split(':')[0].trim() === getPhrase('SSID name')) var parm = statusItem.split(':')[1].trim().substring(1, statusItem.split(':')[1].trim().length - 1);else var parm = statusItem.split(':').length > 2 ? statusItem.split(':').splice(0, 1).join(':').trim() : statusItem.split(':')[1].trim();
                     statusObject[statusItem.split(':')[0].trim()] = parm;
                 });
                 statusObject['compatible'] = Compatible;
@@ -106,10 +133,11 @@ module.exports = {
             _this4.exec('netsh wlan show drivers').then(function (output) {
                 var networkData = output.split('\n').map(Function.prototype.call, String.prototype.trim).filter(Boolean);
 
-                var matches = _lodash2.default.filter(networkData, function (line) {
-                    return line.indexOf('Hosted network supported') !== -1;
-                })[0].split(':').map(Function.prototype.call, String.prototype.trim).filter(Boolean);
-                resolve(matches[1] === 'Yes');
+                var isSupported = _lodash2.default.filter(networkData, function (line) {
+                    return line.indexOf(getPhrase('Hosted network supported')) !== -1;
+                })[0].split(':').map(Function.prototype.call, String.prototype.trim).filter(Boolean)[1].toLowerCase();
+
+                resolve(isSupported === getPhrase('yes'));
             }).catch(reject);
         });
     },
@@ -167,8 +195,8 @@ module.exports = {
         return new _bluebird2.default(function (resolve, reject) {
             _this8.getStatus().then(function (statusObject) {
                 resolve({
-                    connected: statusObject.Status === 'Started' ? parseInt(statusObject['Number of clients']) : 0,
-                    max: parseInt(statusObject['Max number of clients'])
+                    connected: statusObject[getPhrase('Status')] === getPhrase('Started') ? parseInt(statusObject[getPhrase('Number of clients')]) : 0,
+                    max: parseInt(statusObject[getPhrase('Max number of clients')])
                 });
             }).catch(reject);
         });
