@@ -85,7 +85,7 @@ module.exports = {
             }).then(function (hostedNetwork) {
                 return new _bluebird2.default(function (resolve, reject) {
                     if (_this.ConnectedAdaptor) _lodash2.default.delay(function () {
-                        _this.exec(_util2.default.format('"%s" enable "%s" "%s" true', _path2.default.join(__dirname, '../../../../../../../', 'bin/win32/IcsManager.exe'), _this.ConnectedAdaptor, hostedNetwork)).then(resolve).catch(reject);
+                        _this.exec(_util2.default.format('"%s" enable "%s" "%s" true', _path2.default.join(__dirname, '../../', 'bin/win32/IcsManager.exe'), _this.ConnectedAdaptor, hostedNetwork)).then(resolve).catch(reject);
                     }, 500);else resolve();
                 });
             }).then(function () {
