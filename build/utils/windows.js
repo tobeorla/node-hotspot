@@ -170,9 +170,15 @@ module.exports = {
             _this6.exec(_util2.default.format('"%s" "Get-NetConnectionProfile"', _this6.getPowershell())).then(function (output) {
                 var networkData = output.split('\n').map(Function.prototype.call, String.prototype.trim).filter(Boolean);
                 var statusObject = {};
+                
+                if (networkData.length == 0) {
+                    return resolve(statusObject);
+                }
+                
                 networkData.forEach(function (statusItem) {
                     statusObject[statusItem.split(':')[0].trim()] = statusItem.split(':')[1].trim();
                 });
+                
                 _this6.getLocalIp(statusObject.InterfaceIndex).then(function (ip) {
                     statusObject['ip'] = ip;
                     resolve(statusObject);
